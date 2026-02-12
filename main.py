@@ -2,6 +2,7 @@ from src.extract_text import extract_text_from_pdf
 from src.sample_ext import extract_dynamic_table_pairs, structure_inspection_data
 from src.thermal_ext import extract_thermal_json
 from src.merging import merge_inspection_thermal
+from src.validation import validate_and_prepare
 import json
 
 inspection_text = extract_text_from_pdf("data/Sample_Report.pdf")
@@ -13,5 +14,7 @@ structured_inspection = structure_inspection_data(flat_data)
 thermal_data = extract_thermal_json(thermal_text)
 
 merged_data = merge_inspection_thermal(structured_inspection, thermal_data)
+
+validated_data = validate_and_prepare(merged_data)
 
 print(json.dumps(merged_data, indent=4))

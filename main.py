@@ -17,6 +17,8 @@ structured_inspection = structure_inspection_data(flat_data)
 
 thermal_data = extract_thermal_json(thermal_text)
 
+#thermal_data["average_temperature_difference"] = 1
+
 merged_data = merge_inspection_thermal(structured_inspection, thermal_data)
 
 
@@ -25,8 +27,9 @@ validated_data = validate_and_prepare(merged_data)
 final_ddr = generate_ddr_with_ollama(validated_data)
 
 
-print("\n--- MERGED DATA (DEBUG) ---\n")
-print(json.dumps(merged_data, indent=4))
+
+#print("\n--- MERGED DATA  ---\n")
+#print(json.dumps(merged_data, indent=4))
 
 print("\n\n===== FINAL DDR =====\n")
 print(final_ddr)

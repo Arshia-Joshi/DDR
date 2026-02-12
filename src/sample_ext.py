@@ -4,18 +4,27 @@ def extract_dynamic_table_pairs(text):
 
     data = {}
 
-    
-    colon_pattern = r"([A-Za-z0-9\s\/\-\(\)]+):\s*(.*)"
-    colon_matches = re.findall(colon_pattern, text)
+   
+    lines = text.split("\n")
 
-    for key, value in colon_matches:
-        clean_key = key.strip()
-        clean_value = value.strip()
+   
+    colon_pattern = r"^([A-Za-z0-9\s\/\-\(\)]+):\s*(.+)$"
 
-        if clean_value == "":
-            clean_value = "Not Available"
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
 
-        data[clean_key] = clean_value
+        colon_match = re.match(colon_pattern, line)
+
+        if colon_match:
+            key = colon_match.group(1).strip()
+            value = colon_match.group(2).strip()
+
+            if value == "":
+                value = "Not Available"
+
+            data[key] = value
 
    
     value_patterns = [
@@ -30,19 +39,22 @@ def extract_dynamic_table_pairs(text):
 
     value_regex = "|".join(value_patterns)
 
-    pattern = rf"(.+?)\s+({value_regex})"
+    table_pattern = rf"^(.+?)\s+({value_regex})$"
 
-    matches = re.findall(pattern, text)
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
 
-    for key, value in matches:
-        clean_key = key.strip()
-        clean_value = value.strip()
-        data[clean_key] = clean_value
+        match = re.match(table_pattern, line)
+
+        if match:
+            key = match.group(1).strip()
+            value = match.group(2).strip()
+
+            data[key] = value
 
     return data
-
-
-
 def structure_inspection_data(flat_data):
 
     structured = {
@@ -54,51 +66,20 @@ def structure_inspection_data(flat_data):
     }
 
     for key, value in flat_data.items():
+        lk = key.lower()
 
-        lower_key = key.lower()
-
-        
-        if any(word in lower_key for word in [
-            "property",
-            "floors",
-            "inspection date",
-            "inspected by",
-            "customer",
-            "mobile",
-            "email",
-            "address"
-        ]):
+        if any(w in lk for w in ["property", "floor", "customer", "mobile", "email", "address", "inspection"]):
             structured["property_details"][key] = value
 
-        
-        elif "leakage" in lower_key:
+        elif "leakage" in lk:
             structured["leakage_details"][key] = value
 
-        
-        elif any(word in lower_key for word in [
-            "tile",
-            "nahani",
-            "wc",
-            "gaps",
-            "plumbing",
-            "flush",
-            "washbasin"
-        ]):
+        elif any(w in lk for w in ["wc", "tile", "nahani", "plumbing", "gaps"]):
             structured["bathroom_observations"][key] = value
 
-       
-        elif any(word in lower_key for word in [
-            "external wall",
-            "paint",
-            "crack",
-            "rcc",
-            "column",
-            "beam",
-            "corrosion"
-        ]):
+        elif any(w in lk for w in ["external", "wall", "crack", "rcc", "paint", "fungus", "moss"]):
             structured["external_wall_observations"][key] = value
 
-        
         else:
             structured["other_observations"][key] = value
 
